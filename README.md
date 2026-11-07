@@ -57,6 +57,10 @@ Repository:
 
 https://github.com/Amar05672/ml-classification-assignment
 
+Streamlit app:
+
+https://ml-classification-assignment-6hwbpp2bpmup7igfbshtzz.streamlit.app/
+
 ---
 
 ## Project Structure
