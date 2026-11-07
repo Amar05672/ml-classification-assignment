@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from sklearn.metrics import (
     accuracy_score,
@@ -13,11 +15,8 @@ from sklearn.metrics import (
     roc_curve
 )
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 # =====================================================
-# PAGE CONFIGURATION
+# PAGE CONFIG
 # =====================================================
 
 st.set_page_config(
@@ -33,45 +32,84 @@ st.set_page_config(
 st.title("🩺 Breast Cancer Classification Dashboard")
 
 st.markdown("""
-This application evaluates **five pre-trained machine learning classifiers**
-for predicting whether a breast tumor is **Malignant (M)** or **Benign (B)**.
+### Project Overview
 
-Models included:
+Breast cancer is one of the most common forms of cancer worldwide.
+Early and accurate diagnosis can significantly improve treatment outcomes.
 
-- Logistic Regression
-- Decision Tree
-- K-Nearest Neighbors (KNN)
-- Naive Bayes
-- Support Vector Machine (SVM)
+This project evaluates five Machine Learning classification models that
+predict whether a breast tumor is:
+
+- **Malignant (Cancerous)**
+- **Benign (Non-Cancerous)**
+
+The models were trained offline and saved as `.pkl` files.
+This Streamlit application loads the saved models and evaluates
+their performance using a test dataset.
 """)
 
 # =====================================================
-# SIDEBAR
+# DATASET INFORMATION
 # =====================================================
 
-st.sidebar.header("Project Information")
+st.header("📋 Dataset Information")
 
-st.sidebar.info("""
-Dataset:
-Breast Cancer Wisconsin Dataset
+c1, c2, c3 = st.columns(3)
 
-Target Variable:
-diagnosis
+c1.metric("Total Samples", "569")
+c2.metric("Features", "30")
+c3.metric("Classes", "2")
 
-Classes:
+st.info("""
+**Dataset:** Breast Cancer Wisconsin Dataset
+
+**Target Variable:** diagnosis
+
+**Class Labels**
+
 - 1 = Malignant
 - 0 = Benign
 
-Models:
-- Logistic Regression
-- Decision Tree
-- KNN
-- Naive Bayes
-- SVM
+**Preprocessing**
+
+- Dropped id column
+- Dropped Unnamed: 32 column
+- Applied StandardScaler
 """)
 
 # =====================================================
-# MODEL COMPARISON
+# MODELS
+# =====================================================
+
+st.header("🤖 Models Evaluated")
+
+st.markdown("""
+1. Logistic Regression
+2. Decision Tree
+3. K-Nearest Neighbors (KNN)
+4. Naive Bayes
+5. Support Vector Machine (SVM)
+""")
+
+# =====================================================
+# METRICS
+# =====================================================
+
+st.header("📏 Evaluation Metrics")
+
+st.markdown("""
+The following metrics are used to compare model performance:
+
+- Accuracy
+- Area Under Curve (AUC)
+- Precision
+- Recall
+- F1 Score
+- Matthews Correlation Coefficient (MCC)
+""")
+
+# =====================================================
+# RESULTS COMPARISON
 # =====================================================
 
 st.header("📊 Model Performance Comparison")
@@ -83,21 +121,98 @@ st.dataframe(
     use_container_width=True
 )
 
-winner = results_df.loc[
-    results_df["Accuracy"].idxmax(),
-    "Model"
+winner_row = results_df.loc[
+    results_df["Accuracy"].idxmax()
 ]
 
-st.success(f"🏆 Best Performing Model: {winner}")
+winner_model = winner_row["Model"]
+
+st.success(
+    f"""
+🏆 Best Performing Model: {winner_model}
+
+Accuracy: {winner_row['Accuracy']:.4f}
+"""
+)
 
 # =====================================================
-# UPLOAD TEST DATA
+# MODEL OBSERVATIONS
 # =====================================================
 
-st.header("📂 Upload Test Dataset")
+st.header("📝 Model Observations")
+
+observations = pd.DataFrame({
+    "Model": [
+        "Logistic Regression",
+        "Decision Tree",
+        "KNN",
+        "Naive Bayes",
+        "Support Vector Machine"
+    ],
+    "Observation": [
+        "Produced excellent overall performance with very high AUC and accuracy.",
+        "Easy to interpret but achieved slightly lower performance than the top models.",
+        "Provided strong classification performance after feature scaling.",
+        "Fast and effective model despite its simplifying assumptions.",
+        "Achieved the best balance of Accuracy, Precision, F1 Score and MCC."
+    ]
+})
+
+st.dataframe(
+    observations,
+    use_container_width=True
+)
+
+st.info("""
+🏆 **Overall Winner: Support Vector Machine (SVM)**
+
+The SVM model achieved the highest overall performance and was selected as the best classifier for this dataset.
+""")
+
+# =====================================================
+# WORKFLOW
+# =====================================================
+
+st.header("⚙️ Project Workflow")
+
+st.info("""
+Dataset
+➡ Preprocessing
+➡ Train-Test Split
+➡ Model Training
+➡ Save Trained Models (.pkl)
+➡ Streamlit Deployment
+➡ Model Evaluation
+""")
+
+# =====================================================
+# MODEL PATHS
+# =====================================================
+
+model_paths = {
+    "Logistic Regression": "model/logistic.pkl",
+    "Decision Tree": "model/decision_tree.pkl",
+    "KNN": "model/knn.pkl",
+    "Naive Bayes": "model/naive_bayes.pkl",
+    "SVM": "model/svm.pkl"
+}
+
+# =====================================================
+# TEST DATA EVALUATION
+# =====================================================
+
+st.header("📂 Evaluate Test Dataset")
+
+st.markdown("""
+Upload a CSV file containing the same feature columns used during training.
+
+**Recommended File**
+
+`data/test_data.csv`
+""")
 
 uploaded_file = st.file_uploader(
-    "Upload test_data.csv",
+    "Upload CSV File",
     type=["csv"]
 )
 
@@ -105,18 +220,12 @@ if uploaded_file is not None:
 
     test_df = pd.read_csv(uploaded_file)
 
-    required_columns = list(test_df.columns)
-
-    if "diagnosis" not in required_columns:
+    if "diagnosis" not in test_df.columns:
 
         st.error(
-            "The uploaded file must contain the 'diagnosis' column."
+            "Uploaded file must contain the 'diagnosis' column."
         )
         st.stop()
-
-    # =================================================
-    # DATASET INFO
-    # =================================================
 
     y_true = test_df["diagnosis"]
 
@@ -124,28 +233,21 @@ if uploaded_file is not None:
         columns=["diagnosis"]
     )
 
-    st.subheader("📋 Dataset Information")
+    # ==========================================
+    # DATASET INFO
+    # ==========================================
 
-    c1, c2, c3 = st.columns(3)
+    st.subheader("📋 Uploaded Dataset Summary")
 
-    c1.metric(
-        "Rows",
-        len(test_df)
-    )
+    d1, d2, d3 = st.columns(3)
 
-    c2.metric(
-        "Features",
-        X_test.shape[1]
-    )
+    d1.metric("Rows", len(test_df))
+    d2.metric("Features", X_test.shape[1])
+    d3.metric("Target", "Diagnosis")
 
-    c3.metric(
-        "Target",
-        "Diagnosis"
-    )
-
-    # =================================================
+    # ==========================================
     # LOAD SCALER
-    # =================================================
+    # ==========================================
 
     scaler = joblib.load(
         "model/scaler.pkl"
@@ -155,41 +257,18 @@ if uploaded_file is not None:
         X_test
     )
 
-    # =================================================
+    # ==========================================
     # MODEL SELECTION
-    # =================================================
-
-    st.header("⚙️ Select Model")
-
-    model_files = {
-        "Logistic Regression":
-            "model/logistic.pkl",
-
-        "Decision Tree":
-            "model/decision_tree.pkl",
-
-        "KNN":
-            "model/knn.pkl",
-
-        "Naive Bayes":
-            "model/naive_bayes.pkl",
-
-        "SVM":
-            "model/svm.pkl"
-    }
+    # ==========================================
 
     selected_model = st.selectbox(
-        "Choose a machine learning model",
-        list(model_files.keys())
+        "Select Classification Model",
+        list(model_paths.keys())
     )
 
     model = joblib.load(
-        model_files[selected_model]
+        model_paths[selected_model]
     )
-
-    # =================================================
-    # PREDICTION
-    # =================================================
 
     y_pred = model.predict(
         X_test_scaled
@@ -199,9 +278,9 @@ if uploaded_file is not None:
         X_test_scaled
     )[:, 1]
 
-    # =================================================
+    # ==========================================
     # METRICS
-    # =================================================
+    # ==========================================
 
     accuracy = accuracy_score(
         y_true,
@@ -233,47 +312,45 @@ if uploaded_file is not None:
         y_prob
     )
 
-    st.header(
-        f"📈 {selected_model} Performance"
-    )
+    st.header("📈 Model Performance")
 
-    col1, col2, col3 = st.columns(3)
+    m1, m2, m3 = st.columns(3)
 
-    col1.metric(
+    m1.metric(
         "Accuracy",
         f"{accuracy:.2%}"
     )
 
-    col2.metric(
+    m2.metric(
         "Precision",
         f"{precision:.2%}"
     )
 
-    col3.metric(
+    m3.metric(
         "Recall",
         f"{recall:.2%}"
     )
 
-    col4, col5, col6 = st.columns(3)
+    m4, m5, m6 = st.columns(3)
 
-    col4.metric(
+    m4.metric(
         "F1 Score",
         f"{f1:.2%}"
     )
 
-    col5.metric(
+    m5.metric(
         "MCC",
         f"{mcc:.4f}"
     )
 
-    col6.metric(
+    m6.metric(
         "AUC",
         f"{auc:.4f}"
     )
 
-    # =================================================
-    # PREDICTION TABLE
-    # =================================================
+    # ==========================================
+    # PREDICTIONS
+    # ==========================================
 
     st.header("🔍 Prediction Results")
 
@@ -283,13 +360,9 @@ if uploaded_file is not None:
     })
 
     st.dataframe(
-        prediction_df.head(30),
+        prediction_df,
         use_container_width=True
     )
-
-    # =================================================
-    # DOWNLOAD BUTTON
-    # =================================================
 
     csv = prediction_df.to_csv(
         index=False
@@ -302,9 +375,9 @@ if uploaded_file is not None:
         mime="text/csv"
     )
 
-    # =================================================
-    # CONFUSION MATRIX
-    # =================================================
+    # ==========================================
+    # VISUALIZATIONS
+    # ==========================================
 
     cm = confusion_matrix(
         y_true,
@@ -315,10 +388,6 @@ if uploaded_file is not None:
         y_true,
         y_prob
     )
-
-    # =================================================
-    # SIDE-BY-SIDE CHARTS
-    # =================================================
 
     col1, col2 = st.columns(2)
 
@@ -333,8 +402,8 @@ if uploaded_file is not None:
         sns.heatmap(
             cm,
             annot=True,
-            fmt='d',
-            cmap='Blues',
+            fmt="d",
+            cmap="Blues",
             ax=ax1
         )
 
@@ -359,13 +428,15 @@ if uploaded_file is not None:
         ax2.plot(
             fpr,
             tpr,
-            label=f"AUC = {auc:.4f}"
+            label=f"AUC = {auc:.4f}",
+            linewidth=2
         )
 
         ax2.plot(
             [0, 1],
             [0, 1],
-            linestyle="--"
+            "--",
+            color="red"
         )
 
         ax2.set_xlabel(
@@ -386,10 +457,17 @@ if uploaded_file is not None:
 
 st.markdown("---")
 
-st.caption(
-"""
-Breast Cancer Classification Dashboard using Streamlit and Scikit-Learn.
+st.caption("""
+Breast Cancer Classification Dashboard
+
+Dataset: Breast Cancer Wisconsin Dataset
+
+Developed using:
+- Streamlit
+- Scikit-Learn
+- Pandas
+- Matplotlib
+- Seaborn
 
 Author: Amarnath Krishnan
-"""
-)
+""")
