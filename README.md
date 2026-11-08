@@ -109,13 +109,13 @@ The following classification algorithms were trained and evaluated:
 
 ### Performance Comparison
 
-| ML Model Name	| Accuracy| AUC | Precision | Recall |	F1	| MCC |
+| ML Model Name	| Accuracy| Precision  | Recall | F1 |	MCC	| AUC |
 |-----------|--------|---|------|-----|--|---|
-|Logistic Regression	|0.9649|	0.9960|	0.9750|	0.9286|	0.9512|	0.9245|
-Decision Tree	|0.9298	|0.9246|	0.9048	|0.9048|	0.9048|	0.8492|
-KNN	|0.9561	|0.9823	|0.9744	|0.9048|	0.9383|	0.9058|
-Naive Bayes	|0.9211	|0.9891	|0.9231	|0.8571|	0.8889|	0.8292|
-Support Vector Machine (SVM)	|0.9737|	0.9947	|1.0000|	0.9286|	0.9630	|0.9442|
+|Logistic Regression	|0.965|	0.975|	0.929|	0.951|	0.925|	0.996|
+Decision Tree	|0.930	|0.905|	0.905	|0.905|	0.849|	0.925|
+KNN	|0.956	|0.974	|0.905	|0.938|	0.906|	0.982|
+Naive Bayes	|0.921	|0.923	|0.857	|0.889|	0.829|	0.989|
+Support Vector Machine (SVM)	|0.974|	1.000	|1.929|	0.963|	0.944	|0.995|
 
 ---
 
@@ -142,7 +142,7 @@ The Support Vector Machine achieved:
 - Highest Accuracy (97.37%)
 - Highest Precision (100%)
 - Highest F1 Score (96.30%)
-- Highest MCC (0.9442)
+- Highest MCC (0.9947)
 
 Although Logistic Regression achieved a slightly higher AUC (99.60% vs 99.47%), SVM demonstrated the best overall balance across all evaluation metrics and was therefore selected as the best-performing model for the Breast Cancer Wisconsin Dataset.
 
