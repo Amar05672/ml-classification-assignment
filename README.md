@@ -142,7 +142,7 @@ The Support Vector Machine achieved:
 - Highest Accuracy (97.37%)
 - Highest Precision (100%)
 - Highest F1 Score (96.30%)
-- Highest MCC (0.9947)
+- Highest MCC (0.944)
 
 Although Logistic Regression achieved a slightly higher AUC (99.60% vs 99.47%), SVM demonstrated the best overall balance across all evaluation metrics and was therefore selected as the best-performing model for the Breast Cancer Wisconsin Dataset.
 
