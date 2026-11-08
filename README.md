@@ -115,7 +115,7 @@ The following classification algorithms were trained and evaluated:
 Decision Tree	|0.930	|0.905|	0.905	|0.905|	0.849|	0.925|
 KNN	|0.956	|0.974	|0.905	|0.938|	0.906|	0.982|
 Naive Bayes	|0.921	|0.923	|0.857	|0.889|	0.829|	0.989|
-Support Vector Machine (SVM)	|0.974|	1.000	|1.929|	0.963|	0.944	|0.995|
+Support Vector Machine (SVM)	|0.974|	1.000	|0.929|	0.963|	0.944	|0.995|
 
 ---
 
